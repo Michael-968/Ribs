@@ -1,0 +1,539 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		FD3CF14E3085830700287738 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FD3CF1383085830600287738 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FD3CF13F3085830700287738;
+			remoteInfo = Ribs;
+		};
+		FD3CF1583085830700287738 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FD3CF1383085830600287738 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FD3CF13F3085830700287738;
+			remoteInfo = Ribs;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		FD3CF1403085830700287738 /* Ribs.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ribs.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD3CF14D3085830700287738 /* RibsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RibsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD3CF1573085830700287738 /* RibsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RibsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		FD3CF1423085830700287738 /* Ribs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Ribs;
+			sourceTree = "<group>";
+		};
+		FD3CF1503085830700287738 /* RibsTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RibsTests;
+			sourceTree = "<group>";
+		};
+		FD3CF15A3085830700287738 /* RibsUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RibsUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FD3CF13D3085830700287738 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		FD3CF14A3085830700287738 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		FD3CF1543085830700287738 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FD3CF1373085830600287738 = {
+			isa = PBXGroup;
+			children = (
+				FD3CF1423085830700287738 /* Ribs */,
+				FD3CF1503085830700287738 /* RibsTests */,
+				FD3CF15A3085830700287738 /* RibsUITests */,
+				FD3CF1413085830700287738 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FD3CF1413085830700287738 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FD3CF1403085830700287738 /* Ribs.app */,
+				FD3CF14D3085830700287738 /* RibsTests.xctest */,
+				FD3CF1573085830700287738 /* RibsUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FD3CF13F3085830700287738 /* Ribs */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FD3CF15F3085830700287738 /* Build configuration list for PBXNativeTarget "Ribs" */;
+			buildPhases = (
+				FD3CF13C3085830700287738 /* Sources */,
+				FD3CF13D3085830700287738 /* Frameworks */,
+				FD3CF13E3085830700287738 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				FD3CF1423085830700287738 /* Ribs */,
+			);
+			name = Ribs;
+			productName = Ribs;
+			productReference = FD3CF1403085830700287738 /* Ribs.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FD3CF14C3085830700287738 /* RibsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FD3CF1623085830700287738 /* Build configuration list for PBXNativeTarget "RibsTests" */;
+			buildPhases = (
+				FD3CF1493085830700287738 /* Sources */,
+				FD3CF14A3085830700287738 /* Frameworks */,
+				FD3CF14B3085830700287738 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FD3CF14F3085830700287738 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				FD3CF1503085830700287738 /* RibsTests */,
+			);
+			name = RibsTests;
+			productName = RibsTests;
+			productReference = FD3CF14D3085830700287738 /* RibsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		FD3CF1563085830700287738 /* RibsUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FD3CF1653085830700287738 /* Build configuration list for PBXNativeTarget "RibsUITests" */;
+			buildPhases = (
+				FD3CF1533085830700287738 /* Sources */,
+				FD3CF1543085830700287738 /* Frameworks */,
+				FD3CF1553085830700287738 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FD3CF1593085830700287738 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				FD3CF15A3085830700287738 /* RibsUITests */,
+			);
+			name = RibsUITests;
+			productName = RibsUITests;
+			productReference = FD3CF1573085830700287738 /* RibsUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FD3CF1383085830600287738 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2710;
+				LastUpgradeCheck = 2710;
+				TargetAttributes = {
+					FD3CF13F3085830700287738 = {
+						CreatedOnToolsVersion = 27.1;
+					};
+					FD3CF14C3085830700287738 = {
+						CreatedOnToolsVersion = 27.1;
+						TestTargetID = FD3CF13F3085830700287738;
+					};
+					FD3CF1563085830700287738 = {
+						CreatedOnToolsVersion = 27.1;
+						TestTargetID = FD3CF13F3085830700287738;
+					};
+				};
+			};
+			buildConfigurationList = FD3CF13B3085830600287738 /* Build configuration list for PBXProject "Ribs" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FD3CF1373085830600287738;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FD3CF1413085830700287738 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FD3CF13F3085830700287738 /* Ribs */,
+				FD3CF14C3085830700287738 /* RibsTests */,
+				FD3CF1563085830700287738 /* RibsUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FD3CF13E3085830700287738 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		FD3CF14B3085830700287738 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		FD3CF1553085830700287738 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FD3CF13C3085830700287738 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		FD3CF1493085830700287738 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		FD3CF1533085830700287738 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FD3CF14F3085830700287738 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FD3CF13F3085830700287738 /* Ribs */;
+			targetProxy = FD3CF14E3085830700287738 /* PBXContainerItemProxy */;
+		};
+		FD3CF1593085830700287738 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FD3CF13F3085830700287738 /* Ribs */;
+			targetProxy = FD3CF1583085830700287738 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		FD3CF15D3085830700287738 /* Debug configuration for PBXProject "Ribs" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		FD3CF15E3085830700287738 /* Release configuration for PBXProject "Ribs" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		FD3CF1603085830700287738 /* Debug configuration for PBXNativeTarget "Ribs" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Michael.Preobrazhensky.Ribs;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		FD3CF1613085830700287738 /* Release configuration for PBXNativeTarget "Ribs" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Michael.Preobrazhensky.Ribs;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		FD3CF1633085830700287738 /* Debug configuration for PBXNativeTarget "RibsTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Michael.Preobrazhensky.RibsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ribs.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ribs";
+			};
+			name = Debug;
+		};
+		FD3CF1643085830700287738 /* Release configuration for PBXNativeTarget "RibsTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Michael.Preobrazhensky.RibsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ribs.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ribs";
+			};
+			name = Release;
+		};
+		FD3CF1663085830700287738 /* Debug configuration for PBXNativeTarget "RibsUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Michael.Preobrazhensky.RibsUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Ribs;
+			};
+			name = Debug;
+		};
+		FD3CF1673085830700287738 /* Release configuration for PBXNativeTarget "RibsUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Michael.Preobrazhensky.RibsUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Ribs;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FD3CF13B3085830600287738 /* Build configuration list for PBXProject "Ribs" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FD3CF15D3085830700287738 /* Debug configuration for PBXProject "Ribs" */,
+				FD3CF15E3085830700287738 /* Release configuration for PBXProject "Ribs" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		FD3CF15F3085830700287738 /* Build configuration list for PBXNativeTarget "Ribs" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FD3CF1603085830700287738 /* Debug configuration for PBXNativeTarget "Ribs" */,
+				FD3CF1613085830700287738 /* Release configuration for PBXNativeTarget "Ribs" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		FD3CF1623085830700287738 /* Build configuration list for PBXNativeTarget "RibsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FD3CF1633085830700287738 /* Debug configuration for PBXNativeTarget "RibsTests" */,
+				FD3CF1643085830700287738 /* Release configuration for PBXNativeTarget "RibsTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		FD3CF1653085830700287738 /* Build configuration list for PBXNativeTarget "RibsUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FD3CF1663085830700287738 /* Debug configuration for PBXNativeTarget "RibsUITests" */,
+				FD3CF1673085830700287738 /* Release configuration for PBXNativeTarget "RibsUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FD3CF1383085830600287738 /* Project object */;
+	validationLevel = 1;
+}
