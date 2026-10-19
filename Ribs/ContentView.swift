@@ -1,19 +1,13 @@
-//
-//  ContentView.swift
-//  Ribs
-//
-//  Created by Michael  Preobrazhensky on 19.10.2026.
-//
-
-import Foundation
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Environment(\.modelContext) private var context
+    @Environment(PlayerEngine.self) private var player
     @Query(sort: \Track.dateAdded, order: .reverse) private var tracks: [Track]
 
+    @State private var selectedID: Track.ID?
     @State private var showImporter = false
     @State private var isDropTarget = false
     @State private var status: String?
@@ -35,7 +29,7 @@ struct ContentView: View {
                 sidebar
                 mainArea
             }
-            playbackBar
+            PlaybackBar()
         }
         .padding(12)
         .frame(minWidth: 1000, minHeight: 640)
@@ -120,8 +114,20 @@ struct ContentView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(sortedTracks) { track in
-                            TrackRow(track: track)
+                            TrackRow(track: track,
+                                     isCurrent: player.current?.id == track.id,
+                                     isPlaying: player.isPlaying,
+                                     isSelected: selectedID == track.id)
+                                .contentShape(Rectangle())
+                                .onTapGesture(count: 2) {                 // double-click = play
+                                    selectedID = track.id
+                                    player.play(track, from: sortedTracks)
+                                }
+                                .simultaneousGesture(TapGesture().onEnded { // single click = select
+                                    selectedID = track.id
+                                })
                                 .contextMenu {
+                                    Button("Play") { player.play(track, from: sortedTracks) }
                                     Button("Show in Finder") {
                                         NSWorkspace.shared.activateFileViewerSelecting([track.fileURL])
                                     }
@@ -156,23 +162,6 @@ struct ContentView: View {
         } isTargeted: { isDropTarget = $0 }
     }
 
-    // MARK: Playback bar (placeholder until stage 3)
-
-    private var playbackBar: some View {
-        HStack(spacing: 12) {
-            ArtworkView(image: nil, size: 46)
-            Text("Not Playing").foregroundStyle(Theme.secondary)
-            Spacer()
-            TogglePill(label: "SHF", isOn: false)
-            TogglePill(label: "RPT", isOn: false)
-            Spacer()
-            Text("No source").font(Theme.mono(11)).foregroundStyle(Theme.tertiary)
-        }
-        .padding(.horizontal, 18)
-        .frame(height: 76)
-        .glassPanel()
-    }
-
     // MARK: Actions
 
     private func runImport(_ urls: [URL], copy: Bool) async {
@@ -181,6 +170,8 @@ struct ContentView: View {
     }
 
     private func delete(_ track: Track) {
+        if selectedID == track.id { selectedID = nil }
+        player.remove(track)
         try? FileManager.default.trashItem(at: track.fileURL, resultingItemURL: nil)
         context.delete(track)
         try? context.save()
@@ -200,36 +191,65 @@ struct ContentView: View {
 
 struct TrackRow: View {
     let track: Track
+    var isCurrent = false
+    var isPlaying = false
+    var isSelected = false
+    @Environment(\.colorScheme) private var scheme
+
+    private var titleColor: Color {
+        if isSelected { return Theme.selectedText }
+        return isCurrent ? Theme.accent : Theme.text
+    }
+
+    private func detailColor(_ normal: Color) -> Color {
+        isSelected ? Theme.selectedText.opacity(0.85) : normal
+    }
 
     var body: some View {
         HStack(spacing: 16) {
             ArtworkView(image: track.artworkData.flatMap { NSImage(data: $0) }, size: 28)
-            Text(track.title)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(spacing: 8) {
+                Text(track.title)
+                    .foregroundStyle(titleColor)
+                    .fontWeight(isCurrent && scheme == .light ? .semibold : .regular)
+                    .lineLimit(1)
+                if isCurrent {
+                    Image(systemName: "waveform")
+                        .font(.system(size: 11))
+                        .foregroundStyle(isSelected ? Theme.selectedText : Theme.accent)
+                        .symbolEffect(.variableColor.iterative, isActive: isPlaying)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             Text(track.artist ?? "N/A")
-                .foregroundStyle(track.artist == nil ? Theme.tertiary : Theme.secondary)
+                .foregroundStyle(detailColor(track.artist == nil ? Theme.tertiary : Theme.secondary))
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Text(track.durationText)
                 .font(Theme.mono(12))
-                .foregroundStyle(Theme.secondary)
+                .foregroundStyle(detailColor(Theme.secondary))
                 .frame(width: 56, alignment: .trailing)
             Text(track.dateAdded, format: .dateTime.day().month(.abbreviated).year())
                 .font(.system(size: 12))
-                .foregroundStyle(Theme.tertiary)
+                .foregroundStyle(detailColor(Theme.tertiary))
                 .frame(width: 120, alignment: .leading)
         }
         .font(.system(size: 13))
         .padding(.horizontal, 12)
         .frame(height: 39)
+        .highlight(isSelected ? .selected : (isCurrent ? .playing : nil))
         .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.hairline).frame(height: 1)
+            if !isSelected && !isCurrent {
+                Rectangle().fill(Theme.hairline).frame(height: 1)
+            }
         }
     }
 }
 
 #Preview {
     ContentView()
+        .environment(PlayerEngine())
         .modelContainer(for: [Track.self, Playlist.self], inMemory: true)
 }
