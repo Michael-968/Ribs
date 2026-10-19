@@ -57,7 +57,12 @@ final class PlayerEngine {
         buildQueue(startingWith: track)
         load(queue[index], autoplay: true)
     }
-
+    /// Play / Shuffle buttons on album and playlist pages.
+    func playAll(_ list: [Track], shuffled: Bool) {
+        guard let first = shuffled ? list.randomElement() : list.first else { return }
+        shuffle = shuffled
+        play(first, from: list)
+    }
     func togglePlayPause() {
         guard current != nil else { return }
         isPlaying ? pause() : resume()
