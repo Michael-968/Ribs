@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct RibsApp: App {
@@ -6,6 +7,7 @@ struct RibsApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [Track.self, Playlist.self])
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1360, height: 896)
     }
