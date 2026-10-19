@@ -9,6 +9,7 @@ enum SidebarItem: Hashable {
 
 struct SidebarView: View {
     @Binding var selection: SidebarItem
+    @Binding var search: String
 
     @Environment(\.modelContext) private var context
     @Query(sort: \Playlist.createdAt) private var playlists: [Playlist]
@@ -16,10 +17,12 @@ struct SidebarView: View {
     @State private var renamingID: UUID?
     @State private var draftName = ""
     @FocusState private var renameFocused: Bool
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            
+            searchField
+                .padding(.bottom, 10)
 
             sectionLabel("Library")
             item("Songs", .songs)
@@ -51,6 +54,51 @@ struct SidebarView: View {
         .frame(width: 232)
         .frame(maxHeight: .infinity)
         .glassPanel()
+        .background {
+            // Invisible button so Cmd + F jumps to search
+            Button("Find") { searchFocused = true }
+                .keyboardShortcut("f", modifiers: .command)
+                .opacity(0)
+                .allowsHitTesting(false)
+        }
+    }
+
+    // MARK: Search
+
+    private var searchField: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.tertiary)
+            TextField("Search", text: $search)
+                .textFieldStyle(.plain)
+                .font(.system(size: 13))
+                .focused($searchFocused)
+                .onExitCommand {                      // Esc clears
+                    search = ""
+                    searchFocused = false
+                }
+            if !search.isEmpty {
+                Button {
+                    search = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.tertiary)
+                }
+                .buttonStyle(.plain)
+                .help("Clear search")
+            }
+        }
+        .padding(.horizontal, 8)
+        .frame(height: 28)
+        .background {
+            RoundedRectangle(cornerRadius: 8).fill(Theme.text.opacity(0.06))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .strokeBorder(searchFocused ? Theme.selectedStroke : Theme.hairline, lineWidth: 1)
+        }
     }
 
     // MARK: Rows

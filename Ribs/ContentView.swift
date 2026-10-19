@@ -1,3 +1,11 @@
+//
+//  ContentView 2.swift
+//  Ribs
+//
+//  Created by Michael  Preobrazhensky on 19.10.2026.
+//
+
+
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
@@ -12,17 +20,33 @@ struct ContentView: View {
 
     @State private var selection: SidebarItem = .songs
     @State private var openAlbum: String?
+    @State private var search = ""
     @State private var showImporter = false
     @State private var isDropTarget = false
     @State private var status: String?
 
+    /// Songs matching the search (all songs when the search is empty).
+    private var visibleTracks: [Track] {
+        let query = search.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return tracks }
+        return tracks.filter { track in
+            track.title.localizedStandardContains(query)
+                || (track.artist?.localizedStandardContains(query) ?? false)
+                || (track.album?.localizedStandardContains(query) ?? false)
+        }
+    }
+
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                SidebarView(selection: $selection)
+                SidebarView(selection: $selection, search: $search)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    page
+                    if !search.isEmpty && visibleTracks.isEmpty {
+                        noResults
+                    } else {
+                        page
+                    }
 
                     if let status {
                         Text(status)
@@ -74,17 +98,32 @@ struct ContentView: View {
     private var page: some View {
         switch selection {
         case .songs:
-            SongsView(tracks: tracks, onAdd: { showImporter = true }, onDelete: delete)
+            SongsView(tracks: visibleTracks, onAdd: { showImporter = true }, onDelete: delete)
         case .albums:
-            AlbumsView(tracks: tracks, openAlbum: $openAlbum,
+            AlbumsView(tracks: visibleTracks, openAlbum: $openAlbum,
                        onAdd: { showImporter = true }, onDelete: delete)
         case .playlist(let id):
             if let playlist = playlists.first(where: { $0.id == id }) {
-                PlaylistView(playlist: playlist, allTracks: tracks, onDelete: delete)
+                PlaylistView(playlist: playlist, allTracks: visibleTracks, onDelete: delete)
             } else {
-                SongsView(tracks: tracks, onAdd: { showImporter = true }, onDelete: delete)
+                SongsView(tracks: visibleTracks, onAdd: { showImporter = true }, onDelete: delete)
             }
         }
+    }
+
+    private var noResults: some View {
+        VStack(spacing: 8) {
+            Spacer()
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 28))
+                .foregroundStyle(Theme.tertiary)
+            Text("No results for “\(search)”")
+                .font(.system(size: 19, weight: .semibold))
+            Text("Searches titles, artists and albums.")
+                .foregroundStyle(Theme.secondary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: Actions
