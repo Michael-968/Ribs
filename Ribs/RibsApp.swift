@@ -6,7 +6,7 @@ struct RibsApp: App {
     @State private var player = PlayerEngine()
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "main") {
             ContentView()
                 .environment(player)
         }
@@ -16,6 +16,15 @@ struct RibsApp: App {
         .commands {
             PlayerCommands(player: player)
         }
+
+        // Menu bar mini player
+        MenuBarExtra {
+            MiniPlayerView()
+                .environment(player)
+        } label: {
+            Image(systemName: player.isPlaying ? "record.circle.fill" : "record.circle")
+        }
+        .menuBarExtraStyle(.window)
     }
 }
 
