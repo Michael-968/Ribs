@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct SongsView: View {
     let tracks: [Track]
@@ -36,12 +37,16 @@ struct SongsView: View {
 }
 
 /// Column headers + rows. `tracks` is both the display order and the play queue.
+/// Pass a `playlist` to enable reordering and "Remove from Playlist".
 struct TrackList: View {
     let tracks: [Track]
+    var playlist: Playlist? = nil
     let onDelete: (Track) -> Void
 
     @Environment(PlayerEngine.self) private var player
-    @State private var selectedID: Track.ID?
+    @Environment(\.modelContext) private var context
+    @Query(sort: \Playlist.createdAt) private var playlists: [Playlist]
+    @State private var selectedID: UUID?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -64,33 +69,103 @@ struct TrackList: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(tracks) { track in
-                        TrackRow(track: track,
-                                 isCurrent: player.current?.id == track.id,
-                                 isPlaying: player.isPlaying,
-                                 isSelected: selectedID == track.id)
-                            .contentShape(Rectangle())
-                            .onTapGesture(count: 2) {                   // double-click = play
-                                selectedID = track.id
-                                player.play(track, from: tracks)
-                            }
-                            .simultaneousGesture(TapGesture().onEnded { // single click = select
-                                selectedID = track.id
-                            })
-                            .contextMenu {
-                                Button("Play") { player.play(track, from: tracks) }
-                                Button("Show in Finder") {
-                                    NSWorkspace.shared.activateFileViewerSelecting([track.fileURL])
-                                }
-                                Divider()
-                                Button("Move to Trash", role: .destructive) {
-                                    if selectedID == track.id { selectedID = nil }
-                                    onDelete(track)
-                                }
-                            }
+                        row(for: track)
                     }
                 }
                 .padding(.top, 6)
             }
+        }
+    }
+
+    private func row(for track: Track) -> some View {
+        TrackRow(track: track,
+                 isCurrent: player.current?.id == track.id,
+                 isPlaying: player.isPlaying,
+                 isSelected: selectedID == track.id)
+            .contentShape(Rectangle())
+            .onTapGesture(count: 2) {                       // double-click = play
+                selectedID = track.id
+                player.play(track, from: tracks)
+            }
+            .simultaneousGesture(TapGesture().onEnded {     // single click = select
+                selectedID = track.id
+            })
+            .draggable(track.id.uuidString)                 // drag onto a sidebar playlist
+            .modifier(ReorderDrop(enabled: playlist != nil) { items in
+                reorder(items, onto: track)
+            })
+            .contextMenu {
+                Button("Play") { player.play(track, from: tracks) }
+
+                Menu("Add to Playlist") {
+                    ForEach(playlists) { list in
+                        Button(list.name) { add(track, to: list) }
+                    }
+                    if !playlists.isEmpty { Divider() }
+                    Button("New Playlist") {
+                        let list = Playlist(name: "Untitled Playlist")
+                        list.trackIDs = [track.id]
+                        context.insert(list)
+                        try? context.save()
+                    }
+                }
+
+                Button("Show in Finder") {
+                    NSWorkspace.shared.activateFileViewerSelecting([track.fileURL])
+                }
+
+                Divider()
+
+                if let playlist {
+                    Button("Remove from Playlist") {
+                        playlist.trackIDs.removeAll { $0 == track.id }
+                        try? context.save()
+                    }
+                }
+                Button("Move to Trash", role: .destructive) {
+                    if selectedID == track.id { selectedID = nil }
+                    onDelete(track)
+                }
+            }
+    }
+
+    private func add(_ track: Track, to list: Playlist) {
+        guard !list.trackIDs.contains(track.id) else { return }
+        list.trackIDs.append(track.id)
+        try? context.save()
+    }
+
+    /// Drop a dragged song onto another song in the playlist to move it there.
+    private func reorder(_ items: [String], onto target: Track) -> Bool {
+        guard let playlist,
+              let raw = items.first,
+              let moving = UUID(uuidString: raw),
+              moving != target.id,
+              let from = playlist.trackIDs.firstIndex(of: moving),
+              let targetIndex = playlist.trackIDs.firstIndex(of: target.id)
+        else { return false }
+
+        var ids = playlist.trackIDs
+        ids.remove(at: from)
+        let newTarget = ids.firstIndex(of: target.id) ?? ids.endIndex
+        ids.insert(moving, at: from < targetIndex ? newTarget + 1 : newTarget)
+        playlist.trackIDs = ids
+        try? context.save()
+        return true
+    }
+}
+
+/// Only playlists accept reordering drops (so file drops elsewhere still import).
+struct ReorderDrop: ViewModifier {
+    let enabled: Bool
+    let perform: ([String]) -> Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if enabled {
+            content.dropDestination(for: String.self) { items, _ in perform(items) }
+        } else {
+            content
         }
     }
 }

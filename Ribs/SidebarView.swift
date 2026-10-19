@@ -1,27 +1,49 @@
 import SwiftUI
+import SwiftData
 
 enum SidebarItem: Hashable {
     case songs
     case albums
+    case playlist(UUID)
 }
 
 struct SidebarView: View {
     @Binding var selection: SidebarItem
 
+    @Environment(\.modelContext) private var context
+    @Query(sort: \Playlist.createdAt) private var playlists: [Playlist]
+
+    @State private var renamingID: UUID?
+    @State private var draftName = ""
+    @FocusState private var renameFocused: Bool
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 10) {
-                RecordLogo(size: 26)
-                Text("Ribs").font(.system(size: 15, weight: .semibold))
-            }
-            .padding(.horizontal, 6)
-            .padding(.bottom, 14)
+            
 
             sectionLabel("Library")
             item("Songs", .songs)
             item("Albums", .albums)
 
-            Spacer()
+            sectionLabel("Playlists").padding(.top, 10)
+            ScrollView {
+                VStack(spacing: 4) {
+                    ForEach(playlists) { playlistRow($0) }
+
+                    Button(action: newPlaylist) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "plus").font(.system(size: 12))
+                            Text("New Playlist")
+                        }
+                        .foregroundStyle(Theme.tertiary)
+                        .padding(.horizontal, 12)
+                        .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .scrollIndicators(.never)
         }
         .font(.system(size: 14))
         .padding(.top, 40)
@@ -30,6 +52,8 @@ struct SidebarView: View {
         .frame(maxHeight: .infinity)
         .glassPanel()
     }
+
+    // MARK: Rows
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text)
@@ -51,5 +75,85 @@ struct SidebarView: View {
                 .highlight(isOn ? .selected : nil, radius: 10)
         }
         .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func playlistRow(_ playlist: Playlist) -> some View {
+        if renamingID == playlist.id {
+            TextField("Playlist name", text: $draftName)
+                .textFieldStyle(.plain)
+                .focused($renameFocused)
+                .onSubmit { commitRename(playlist) }
+                .onExitCommand { renamingID = nil }          // Esc cancels
+                .onChange(of: renameFocused) {
+                    if !renameFocused { commitRename(playlist) }
+                }
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
+                .highlight(.editing, radius: 10)
+                .onAppear { renameFocused = true }
+        } else {
+            let isOn = selection == .playlist(playlist.id)
+            Button { selection = .playlist(playlist.id) } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "music.note.list").font(.system(size: 12))
+                    Text(playlist.name).lineLimit(1)
+                }
+                .foregroundStyle(isOn ? Theme.selectedText : Theme.text)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
+                .contentShape(Rectangle())
+                .highlight(isOn ? .selected : nil, radius: 10)
+            }
+            .buttonStyle(.plain)
+            .contextMenu {
+                Button("Rename") { startRename(playlist) }
+                Divider()
+                Button("Delete Playlist", role: .destructive) { delete(playlist) }
+            }
+            // Drop songs dragged from a list onto the playlist to add them
+            .dropDestination(for: String.self) { items, _ in
+                add(items, to: playlist)
+            }
+        }
+    }
+
+    // MARK: Actions
+
+    private func newPlaylist() {
+        let playlist = Playlist(name: "Untitled Playlist")
+        context.insert(playlist)
+        try? context.save()
+        selection = .playlist(playlist.id)
+        startRename(playlist)
+    }
+
+    private func startRename(_ playlist: Playlist) {
+        draftName = playlist.name
+        renamingID = playlist.id
+    }
+
+    private func commitRename(_ playlist: Playlist) {
+        guard renamingID == playlist.id else { return }
+        let name = draftName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !name.isEmpty { playlist.name = name }
+        renamingID = nil
+        try? context.save()
+    }
+
+    private func delete(_ playlist: Playlist) {
+        if selection == .playlist(playlist.id) { selection = .songs }
+        context.delete(playlist)        // songs stay in the library
+        try? context.save()
+    }
+
+    private func add(_ items: [String], to playlist: Playlist) -> Bool {
+        let ids = items.compactMap(UUID.init(uuidString:))
+        guard !ids.isEmpty else { return false }
+        for id in ids where !playlist.trackIDs.contains(id) {
+            playlist.trackIDs.append(id)
+        }
+        try? context.save()
+        return true
     }
 }

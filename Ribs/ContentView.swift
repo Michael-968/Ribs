@@ -5,7 +5,10 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Environment(PlayerEngine.self) private var player
+    @Environment(\.appearsActive) private var appearsActive
+    @Environment(\.colorScheme) private var colorScheme
     @Query(sort: \Track.dateAdded, order: .reverse) private var tracks: [Track]
+    @Query(sort: \Playlist.createdAt) private var playlists: [Playlist]
 
     @State private var selection: SidebarItem = .songs
     @State private var openAlbum: String?
@@ -19,17 +22,7 @@ struct ContentView: View {
                 SidebarView(selection: $selection)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    switch selection {
-                    case .songs:
-                        SongsView(tracks: tracks,
-                                  onAdd: { showImporter = true },
-                                  onDelete: delete)
-                    case .albums:
-                        AlbumsView(tracks: tracks,
-                                   openAlbum: $openAlbum,
-                                   onAdd: { showImporter = true },
-                                   onDelete: delete)
-                    }
+                    page
 
                     if let status {
                         Text(status)
@@ -58,12 +51,38 @@ struct ContentView: View {
         .frame(minWidth: 1000, minHeight: 640)
         .foregroundStyle(Theme.text)
         .containerBackground(Theme.base, for: .window)
+        .overlay {
+            // Another window in front: fade into the shadows (dark mode only)
+            if !appearsActive && colorScheme == .dark {
+                Color.black.opacity(0.28)
+                    .allowsHitTesting(false)
+                    .ignoresSafeArea()
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: appearsActive)
         .onChange(of: selection) { openAlbum = nil }
         .fileImporter(isPresented: $showImporter,
                       allowedContentTypes: [.audio, .folder],
                       allowsMultipleSelection: true) { result in
             if case .success(let urls) = result {
                 Task { await runImport(urls, copy: false) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var page: some View {
+        switch selection {
+        case .songs:
+            SongsView(tracks: tracks, onAdd: { showImporter = true }, onDelete: delete)
+        case .albums:
+            AlbumsView(tracks: tracks, openAlbum: $openAlbum,
+                       onAdd: { showImporter = true }, onDelete: delete)
+        case .playlist(let id):
+            if let playlist = playlists.first(where: { $0.id == id }) {
+                PlaylistView(playlist: playlist, allTracks: tracks, onDelete: delete)
+            } else {
+                SongsView(tracks: tracks, onAdd: { showImporter = true }, onDelete: delete)
             }
         }
     }
@@ -77,6 +96,9 @@ struct ContentView: View {
 
     private func delete(_ track: Track) {
         player.remove(track)
+        for playlist in playlists {
+            playlist.trackIDs.removeAll { $0 == track.id }
+        }
         try? FileManager.default.trashItem(at: track.fileURL, resultingItemURL: nil)
         context.delete(track)
         try? context.save()

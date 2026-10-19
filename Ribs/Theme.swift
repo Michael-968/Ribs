@@ -1,11 +1,3 @@
-//
-//  Theme.swift
-//  Ribs
-//
-//  Created by Michael  Preobrazhensky on 19.10.2026.
-//
-
-import Foundation
 import SwiftUI
 
 // MARK: - Design tokens (dark = black + red, light = white + black)
@@ -36,10 +28,13 @@ enum Theme {
     static let highlightFill   = Color(light: Color(hex: 0xFFB800).opacity(0.14), dark: Color(hex: 0xFFD60A).opacity(0.07))
     static let highlightStroke = Color(light: Color(hex: 0x9A5B00).opacity(0.70), dark: Color(hex: 0xFFD60A).opacity(0.42))
 
-    // Glass
-    static let glassTint = Color(light: .black.opacity(0.06), dark: Color(hex: 0xFF453A).opacity(0.06))
-    static let glassEdgeTop    = Color(light: .black.opacity(0.14), dark: .white.opacity(0.12))
-    static let glassEdgeBottom = Color(light: .black.opacity(0.05), dark: .white.opacity(0.03))
+    // Glass panels: black glass with a red edge and soft red glow in dark mode.
+    // Light-mode values are the same as before, so light mode is unchanged.
+    static let panelFill       = Color(light: .clear,               dark: .black.opacity(0.55))
+    static let glassTint       = Color(light: .black.opacity(0.06), dark: Color(hex: 0xFF453A).opacity(0.10))
+    static let glassEdgeTop    = Color(light: .black.opacity(0.14), dark: Color(hex: 0xFF453A).opacity(0.32))
+    static let glassEdgeBottom = Color(light: .black.opacity(0.05), dark: Color(hex: 0xFF453A).opacity(0.06))
+    static let glassGlow       = Color(light: .clear,               dark: Color(hex: 0xFF453A).opacity(0.14))
 
     // Separator
     static let separator = Color(light: .black.opacity(0.35), dark: Color(hex: 0xFF453A).opacity(0.45))
@@ -75,22 +70,28 @@ extension Color {
     }
 }
 
-// MARK: - Tinted glass panel (sidebar, playback bar, sheets, mini player)
+// MARK: - Glass panel (sidebar, playback bar, sheets, mini player)
 
 struct GlassPanel: ViewModifier {
     var radius: CGFloat = Theme.panelRadius
 
     func body(content: Content) -> some View {
         content
+            .background {
+                // near-black layer inside the glass (dark mode), so it reads black, not pink
+                RoundedRectangle(cornerRadius: radius).fill(Theme.panelFill)
+            }
             .glassEffect(.regular.tint(Theme.glassTint),
                          in: .rect(cornerRadius: radius))
             .overlay {
+                // thin edge, brighter at the top (red in dark mode)
                 RoundedRectangle(cornerRadius: radius)
                     .strokeBorder(
                         LinearGradient(colors: [Theme.glassEdgeTop, Theme.glassEdgeBottom],
                                        startPoint: .top, endPoint: .bottom),
                         lineWidth: 1)
             }
+            .shadow(color: Theme.glassGlow, radius: 16)   // soft red glow (dark mode only)
     }
 }
 
