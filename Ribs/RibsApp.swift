@@ -1,10 +1,3 @@
-//
-//  RibsApp.swift
-//  Ribs
-//
-//  Created by Mikhail Kemenov on 19.10.2026.
-//
-
 import SwiftUI
 
 @main
@@ -13,5 +6,7 @@ struct RibsApp: App {
         WindowGroup {
             ContentView()
         }
+        .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 1360, height: 896)
     }
 }
