@@ -1,3 +1,11 @@
+//
+//  SongsView.swift
+//  Ribs
+//
+//  Created by Michael  Preobrazhensky on 19.10.2026.
+//
+
+
 import SwiftUI
 import SwiftData
 
@@ -47,6 +55,7 @@ struct TrackList: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Playlist.createdAt) private var playlists: [Playlist]
     @State private var selectedID: UUID?
+    @State private var editingTrack: Track?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -75,13 +84,17 @@ struct TrackList: View {
                 .padding(.top, 6)
             }
         }
+        .sheet(item: $editingTrack) { track in
+            EditInfoSheet(track: track)
+        }
     }
 
     private func row(for track: Track) -> some View {
         TrackRow(track: track,
                  isCurrent: player.current?.id == track.id,
                  isPlaying: player.isPlaying,
-                 isSelected: selectedID == track.id)
+                 isSelected: selectedID == track.id,
+                 isEditing: editingTrack?.id == track.id)
             .contentShape(Rectangle())
             .onTapGesture(count: 2) {                       // double-click = play
                 selectedID = track.id
@@ -96,6 +109,10 @@ struct TrackList: View {
             })
             .contextMenu {
                 Button("Play") { player.play(track, from: tracks) }
+                Button("Edit Info…") {
+                    selectedID = track.id
+                    editingTrack = track
+                }
 
                 Menu("Add to Playlist") {
                     ForEach(playlists) { list in
@@ -170,21 +187,29 @@ struct ReorderDrop: ViewModifier {
     }
 }
 
-/// One song row.
+/// How one song row looks.
 struct TrackRow: View {
     let track: Track
     var isCurrent = false
     var isPlaying = false
     var isSelected = false
+    var isEditing = false
     @Environment(\.colorScheme) private var scheme
 
     private var titleColor: Color {
+        if isEditing { return Theme.highlight }
         if isSelected { return Theme.selectedText }
         return isCurrent ? Theme.accent : Theme.text
     }
 
     private func detailColor(_ normal: Color) -> Color {
-        isSelected ? Theme.selectedText.opacity(0.85) : normal
+        (isSelected && !isEditing) ? Theme.selectedText.opacity(0.85) : normal
+    }
+
+    private var rowHighlight: Highlight? {
+        if isEditing { return .editing }
+        if isSelected { return .selected }
+        return isCurrent ? .playing : nil
     }
 
     var body: some View {
@@ -199,7 +224,7 @@ struct TrackRow: View {
                 if isCurrent {
                     Image(systemName: "waveform")
                         .font(.system(size: 11))
-                        .foregroundStyle(isSelected ? Theme.selectedText : Theme.accent)
+                        .foregroundStyle(isSelected && !isEditing ? Theme.selectedText : Theme.accent)
                         .symbolEffect(.variableColor.iterative, isActive: isPlaying)
                 }
             }
@@ -221,9 +246,9 @@ struct TrackRow: View {
         .font(.system(size: 13))
         .padding(.horizontal, 12)
         .frame(height: 39)
-        .highlight(isSelected ? .selected : (isCurrent ? .playing : nil))
+        .highlight(rowHighlight)
         .overlay(alignment: .bottom) {
-            if !isSelected && !isCurrent {
+            if rowHighlight == nil {
                 Rectangle().fill(Theme.hairline).frame(height: 1)
             }
         }
