@@ -161,7 +161,7 @@ struct SidebarView: View {
             }
             // Drop songs dragged from a list onto the playlist to add them
             .dropDestination(for: String.self) { items, _ in
-                add(items, to: playlist)
+                _ = add(items, to: playlist)
             }
         }
     }

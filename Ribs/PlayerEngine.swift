@@ -31,8 +31,8 @@ final class PlayerEngine {
 
     // Internal
     @ObservationIgnored private let player = AVPlayer()
-    @ObservationIgnored private var queue: [Track] = []
-    @ObservationIgnored private var sourceList: [Track] = []
+    @ObservationIgnored private var queue: [Track] = []        // play order
+    @ObservationIgnored private var sourceList: [Track] = []   // list the song was started from
     @ObservationIgnored private var index = 0
     @ObservationIgnored private var hasRepeatedOnce = false
     @ObservationIgnored private var hasRestored = false
@@ -72,12 +72,14 @@ final class PlayerEngine {
 
     // MARK: - Playing
 
+    /// Plays a song, with the list it came from as the queue.
     func play(_ track: Track, from list: [Track]) {
         sourceList = list
         buildQueue(startingWith: track)
         load(queue[index], autoplay: true)
     }
 
+    /// Play / Shuffle buttons on album and playlist pages.
     func playAll(_ list: [Track], shuffled: Bool) {
         guard let first = shuffled ? list.randomElement() : list.first else { return }
         shuffle = shuffled
@@ -109,14 +111,14 @@ final class PlayerEngine {
             index += 1
             load(queue[index], autoplay: true)
         } else {
-            index = 0
+            index = 0                                  // end of list: back to the start, paused
             load(queue[index], autoplay: false)
         }
     }
 
     func previous() {
         guard !queue.isEmpty else { return }
-        if elapsed > 3 {
+        if elapsed > 3 {                               // restart the song first
             seek(to: 0)
             return
         }
@@ -143,12 +145,16 @@ final class PlayerEngine {
         saveState()
     }
 
+    /// Call when a song is deleted from the library.
     func remove(_ track: Track) {
         if current?.id == track.id { stop() }
         queue.removeAll { $0.id == track.id }
         sourceList.removeAll { $0.id == track.id }
         index = min(index, max(queue.count - 1, 0))
     }
+
+    /// Call after Edit Info so Control Centre shows the new title and artist.
+    func refreshNowPlaying() { updateNowPlaying() }
 
     // MARK: - Shuffle & repeat
 
@@ -158,6 +164,7 @@ final class PlayerEngine {
         saveState()
     }
 
+    /// Off → repeat this song continuously → repeat once → off
     func cycleRepeat() {
         switch repeatMode {
         case .off:  repeatMode = .song
@@ -170,6 +177,7 @@ final class PlayerEngine {
 
     // MARK: - Remember the last song
 
+    /// Call once at launch: brings back the last song, paused where you left it.
     func restore(from list: [Track]) {
         guard !hasRestored else { return }
         hasRestored = true
@@ -203,6 +211,7 @@ final class PlayerEngine {
         lastSave = .now
     }
 
+    /// While playing, save the position every few seconds (in case of a crash).
     private func saveIfDue() {
         guard isPlaying, Date.now.timeIntervalSince(lastSave) > 5 else { return }
         saveState()
@@ -251,18 +260,18 @@ final class PlayerEngine {
 
     private func songEnded() {
         switch repeatMode {
-        case .song:
+        case .song:                                    // loop forever
             seek(to: 0)
             player.play()
             return
         case .once:
-            if !hasRepeatedOnce {
+            if !hasRepeatedOnce {                      // play it one more time
                 hasRepeatedOnce = true
                 seek(to: 0)
                 player.play()
                 return
             }
-            repeatMode = .off
+            repeatMode = .off                          // used up → switch off, carry on
         case .off:
             break
         }
@@ -270,13 +279,13 @@ final class PlayerEngine {
         if index + 1 < queue.count {
             next()
         } else {
-            isPlaying = false
+            isPlaying = false                          // end of the list
             seek(to: 0)
             saveState()
         }
     }
 
-    // MARK: - Media keys & Now Playing
+    // MARK: - Media keys & Now Playing (Control Centre)
 
     private func setUpRemoteCommands() {
         let center = MPRemoteCommandCenter.shared()
@@ -323,6 +332,7 @@ final class PlayerEngine {
 
     // MARK: - Formatting
 
+    /// 125 → "02:05"
     static func clock(_ seconds: Double) -> String {
         let s = Int(max(0, seconds).rounded(.down))
         return String(format: "%02d:%02d", s / 60, s % 60)

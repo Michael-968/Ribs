@@ -7,6 +7,7 @@ struct EditInfoSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @Environment(PlayerEngine.self) private var player
 
     @State private var title = ""
     @State private var artist = ""
@@ -132,6 +133,7 @@ struct EditInfoSheet: View {
             track.editArtwork = (artwork == track.tagArtwork) ? nil : artwork
         }
         try? context.save()
+        player.refreshNowPlaying()
         dismiss()
     }
 }

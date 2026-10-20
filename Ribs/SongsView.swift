@@ -1,11 +1,3 @@
-//
-//  SongsView.swift
-//  Ribs
-//
-//  Created by Michael  Preobrazhensky on 19.10.2026.
-//
-
-
 import SwiftUI
 import SwiftData
 
@@ -180,7 +172,7 @@ struct ReorderDrop: ViewModifier {
     @ViewBuilder
     func body(content: Content) -> some View {
         if enabled {
-            content.dropDestination(for: String.self) { items, _ in perform(items) }
+            content.dropDestination(for: String.self) { items, _ in _ = perform(items) }
         } else {
             content
         }
