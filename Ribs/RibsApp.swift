@@ -3,6 +3,7 @@ import SwiftData
 
 @main
 struct RibsApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var player = PlayerEngine()
 
     var body: some Scene {
@@ -15,6 +16,11 @@ struct RibsApp: App {
         .defaultSize(width: 1360, height: 896)
         .commands {
             PlayerCommands(player: player)
+        }
+
+        // Ribs → Settings… (Cmd + ,)
+        Settings {
+            SettingsView()
         }
 
         // Menu bar mini player

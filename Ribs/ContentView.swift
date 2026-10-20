@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var showImporter = false
     @State private var isDropTarget = false
     @State private var status: String?
+    @State private var openQueue = OpenQueue.shared
 
     /// Songs matching the search (all songs when the search is empty).
     private var visibleTracks: [Track] {
@@ -81,7 +82,9 @@ struct ContentView: View {
             player.restore(from: tracks.sorted {
                 $0.title.localizedStandardCompare($1.title) == .orderedAscending
             })
+            handleOpenedFiles()
         }
+        .onChange(of: openQueue.pending) { handleOpenedFiles() }
         .onChange(of: selection) { openAlbum = nil }
         .fileImporter(isPresented: $showImporter,
                       allowedContentTypes: [.audio, .folder],
@@ -129,6 +132,28 @@ struct ContentView: View {
     private func runImport(_ urls: [URL], copy: Bool) async {
         let summary = await Importer(context: context).importItems(urls, forceCopy: copy)
         showStatus(summary.message)
+    }
+
+    /// Files opened from Finder (double-click / Open With): import, then play.
+    private func handleOpenedFiles() {
+        let urls = openQueue.pending
+        guard !urls.isEmpty else { return }
+        openQueue.pending = []
+
+        Task {
+            await runImport(urls, copy: false)
+            selection = .songs
+            search = ""
+
+            guard let name = urls.first?.lastPathComponent else { return }
+            let all = (try? context.fetch(FetchDescriptor<Track>())) ?? []
+            if let track = all.first(where: { $0.sourceName == name }) {
+                let sorted = all.sorted {
+                    $0.title.localizedStandardCompare($1.title) == .orderedAscending
+                }
+                player.play(track, from: sorted)
+            }
+        }
     }
 
     private func delete(_ track: Track) {
