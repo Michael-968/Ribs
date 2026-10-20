@@ -1,11 +1,3 @@
-//
-//  ContentView 2.swift
-//  Ribs
-//
-//  Created by Michael  Preobrazhensky on 19.10.2026.
-//
-
-
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
@@ -84,6 +76,12 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: appearsActive)
+        .onAppear {
+            // Bring back the last song, paused where you left off
+            player.restore(from: tracks.sorted {
+                $0.title.localizedStandardCompare($1.title) == .orderedAscending
+            })
+        }
         .onChange(of: selection) { openAlbum = nil }
         .fileImporter(isPresented: $showImporter,
                       allowedContentTypes: [.audio, .folder],

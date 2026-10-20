@@ -1,9 +1,10 @@
 import Foundation
+import AppKit
 import AVFoundation
 import MediaPlayer
 import Observation
 
-enum RepeatMode {
+enum RepeatMode: String {
     case off      // play through the list
     case song     // repeat the current song continuously
     case once     // repeat the current song one more time, then continue
@@ -30,12 +31,23 @@ final class PlayerEngine {
 
     // Internal
     @ObservationIgnored private let player = AVPlayer()
-    @ObservationIgnored private var queue: [Track] = []        // play order
-    @ObservationIgnored private var sourceList: [Track] = []   // list the song was started from
+    @ObservationIgnored private var queue: [Track] = []
+    @ObservationIgnored private var sourceList: [Track] = []
     @ObservationIgnored private var index = 0
     @ObservationIgnored private var hasRepeatedOnce = false
+    @ObservationIgnored private var hasRestored = false
+    @ObservationIgnored private var lastSave = Date.distantPast
     @ObservationIgnored private var timeObserver: Any?
     @ObservationIgnored private var endObserver: NSObjectProtocol?
+    @ObservationIgnored private var quitObserver: NSObjectProtocol?
+
+    // Saved-state keys
+    private enum Key {
+        static let trackID = "lastTrackID"
+        static let position = "lastPosition"
+        static let shuffle = "shuffle"
+        static let repeatMode = "repeatMode"
+    }
 
     init() {
         timeObserver = player.addPeriodicTimeObserver(
@@ -43,26 +55,35 @@ final class PlayerEngine {
             queue: .main
         ) { [weak self] time in
             MainActor.assumeIsolated {
-                self?.elapsed = time.seconds.isFinite ? time.seconds : 0
+                guard let self else { return }
+                self.elapsed = time.seconds.isFinite ? time.seconds : 0
+                self.saveIfDue()
             }
+        }
+        quitObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.willTerminateNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.saveState() }
         }
         setUpRemoteCommands()
     }
 
     // MARK: - Playing
 
-    /// Plays a song, with the list it came from as the queue.
     func play(_ track: Track, from list: [Track]) {
         sourceList = list
         buildQueue(startingWith: track)
         load(queue[index], autoplay: true)
     }
-    /// Play / Shuffle buttons on album and playlist pages.
+
     func playAll(_ list: [Track], shuffled: Bool) {
         guard let first = shuffled ? list.randomElement() : list.first else { return }
         shuffle = shuffled
         play(first, from: list)
     }
+
     func togglePlayPause() {
         guard current != nil else { return }
         isPlaying ? pause() : resume()
@@ -72,6 +93,7 @@ final class PlayerEngine {
         player.pause()
         isPlaying = false
         updateNowPlaying()
+        saveState()
     }
 
     func resume() {
@@ -87,14 +109,14 @@ final class PlayerEngine {
             index += 1
             load(queue[index], autoplay: true)
         } else {
-            index = 0                                  // end of list: back to the start, paused
+            index = 0
             load(queue[index], autoplay: false)
         }
     }
 
     func previous() {
         guard !queue.isEmpty else { return }
-        if elapsed > 3 {                               // restart the song first
+        if elapsed > 3 {
             seek(to: 0)
             return
         }
@@ -118,9 +140,9 @@ final class PlayerEngine {
         duration = 0
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         MPNowPlayingInfoCenter.default().playbackState = .stopped
+        saveState()
     }
 
-    /// Call when a song is deleted from the library.
     func remove(_ track: Track) {
         if current?.id == track.id { stop() }
         queue.removeAll { $0.id == track.id }
@@ -133,9 +155,9 @@ final class PlayerEngine {
     func toggleShuffle() {
         shuffle.toggle()
         if let current { buildQueue(startingWith: current) }
+        saveState()
     }
 
-    /// Off → repeat this song continuously → repeat once → off
     func cycleRepeat() {
         switch repeatMode {
         case .off:  repeatMode = .song
@@ -143,6 +165,47 @@ final class PlayerEngine {
         case .once: repeatMode = .off
         }
         hasRepeatedOnce = false
+        saveState()
+    }
+
+    // MARK: - Remember the last song
+
+    func restore(from list: [Track]) {
+        guard !hasRestored else { return }
+        hasRestored = true
+
+        let defaults = UserDefaults.standard
+        shuffle = defaults.bool(forKey: Key.shuffle)
+        repeatMode = RepeatMode(rawValue: defaults.string(forKey: Key.repeatMode) ?? "") ?? .off
+
+        guard current == nil,
+              let raw = defaults.string(forKey: Key.trackID),
+              let id = UUID(uuidString: raw),
+              let track = list.first(where: { $0.id == id })
+        else { return }
+
+        sourceList = list
+        buildQueue(startingWith: track)
+        load(queue[index], autoplay: false)
+
+        let position = defaults.double(forKey: Key.position)
+        if position > 1 && position < duration - 1 {
+            seek(to: position)
+        }
+    }
+
+    private func saveState() {
+        let defaults = UserDefaults.standard
+        defaults.set(current?.id.uuidString, forKey: Key.trackID)
+        defaults.set(elapsed, forKey: Key.position)
+        defaults.set(shuffle, forKey: Key.shuffle)
+        defaults.set(repeatMode.rawValue, forKey: Key.repeatMode)
+        lastSave = .now
+    }
+
+    private func saveIfDue() {
+        guard isPlaying, Date.now.timeIntervalSince(lastSave) > 5 else { return }
+        saveState()
     }
 
     // MARK: - Internals
@@ -183,22 +246,23 @@ final class PlayerEngine {
             isPlaying = false
         }
         updateNowPlaying()
+        saveState()
     }
 
     private func songEnded() {
         switch repeatMode {
-        case .song:                                    // loop forever
+        case .song:
             seek(to: 0)
             player.play()
             return
         case .once:
-            if !hasRepeatedOnce {                      // play it one more time
+            if !hasRepeatedOnce {
                 hasRepeatedOnce = true
                 seek(to: 0)
                 player.play()
                 return
             }
-            repeatMode = .off                          // used up → switch off, carry on
+            repeatMode = .off
         case .off:
             break
         }
@@ -206,12 +270,13 @@ final class PlayerEngine {
         if index + 1 < queue.count {
             next()
         } else {
-            isPlaying = false                          // end of the list
+            isPlaying = false
             seek(to: 0)
+            saveState()
         }
     }
 
-    // MARK: - Media keys & Now Playing (Control Centre)
+    // MARK: - Media keys & Now Playing
 
     private func setUpRemoteCommands() {
         let center = MPRemoteCommandCenter.shared()
@@ -258,7 +323,6 @@ final class PlayerEngine {
 
     // MARK: - Formatting
 
-    /// 125 → "02:05"
     static func clock(_ seconds: Double) -> String {
         let s = Int(max(0, seconds).rounded(.down))
         return String(format: "%02d:%02d", s / 60, s % 60)
