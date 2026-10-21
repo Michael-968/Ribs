@@ -4,6 +4,7 @@ struct SettingsView: View {
     @State private var isDefault = DefaultPlayer.isRibsDefault
     @State private var working = false
     @State private var autoImport = DownloadsWatcher.shared.isEnabled
+    @State private var lock = TapesLock.shared
 
     var body: some View {
         Form {
@@ -27,6 +28,17 @@ struct SettingsView: View {
                        }))
 
                 Text("New audio files that arrive in Downloads are moved into Ribs automatically. Files already there are left alone. One quiet notification per batch.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Tapes") {
+                Toggle("Lock Tapes with Touch ID or password",
+                       isOn: Binding(get: { lock.isEnabled }, set: { on in
+                           Task { await lock.setEnabled(on) }
+                       }))
+
+                Text("Tapes stays hidden until you unlock it. It locks again when you quit Ribs, lock your Mac, or click the lock button. Everything stays on this Mac.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

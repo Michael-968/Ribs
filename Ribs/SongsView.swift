@@ -106,16 +106,30 @@ struct TrackList: View {
                     editingTrack = track
                 }
 
-                Menu("Add to Playlist") {
-                    ForEach(playlists) { list in
-                        Button(list.name) { add(track, to: list) }
+                if track.collection == nil {
+                    Menu("Add to Playlist") {
+                        ForEach(playlists) { list in
+                            Button(list.name) { add(track, to: list) }
+                        }
+                        if !playlists.isEmpty { Divider() }
+                        Button("New Playlist") {
+                            let list = Playlist(name: "Untitled Playlist")
+                            list.trackIDs = [track.id]
+                            context.insert(list)
+                            try? context.save()
+                        }
                     }
-                    if !playlists.isEmpty { Divider() }
-                    Button("New Playlist") {
-                        let list = Playlist(name: "Untitled Playlist")
-                        list.trackIDs = [track.id]
-                        context.insert(list)
-                        try? context.save()
+                }
+
+                Menu("Move to") {
+                    if track.collection != nil {
+                        Button("Music") { move(track, to: nil) }
+                    }
+                    if track.collection != TrackCollection.archive {
+                        Button("Archive") { move(track, to: TrackCollection.archive) }
+                    }
+                    if track.collection != TrackCollection.tapes {
+                        Button("Tapes") { move(track, to: TrackCollection.tapes) }
                     }
                 }
 
@@ -136,6 +150,12 @@ struct TrackList: View {
                     onDelete(track)
                 }
             }
+    }
+
+    private func move(_ track: Track, to collection: String?) {
+        if selectedID == track.id { selectedID = nil }
+        track.collection = collection
+        try? context.save()
     }
 
     private func add(_ track: Track, to list: Playlist) {

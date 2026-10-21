@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AppKit
 
 @main
 struct RibsApp: App {
@@ -23,14 +24,35 @@ struct RibsApp: App {
             SettingsView()
         }
 
-        // Menu bar mini player
+        // Menu bar mini player: icon turns red while playing
         MenuBarExtra {
             MiniPlayerView()
                 .environment(player)
         } label: {
-            Image(systemName: player.isPlaying ? "record.circle.fill" : "record.circle")
+            Image(nsImage: MenuBarIcon.image(playing: player.isPlaying))
         }
         .menuBarExtraStyle(.window)
+    }
+}
+
+enum MenuBarIcon {
+    static func image(playing: Bool) -> NSImage {
+        let name = playing ? "record.circle.fill" : "record.circle"
+        guard let base = NSImage(systemSymbolName: name, accessibilityDescription: "Ribs") else {
+            return NSImage()
+        }
+        if playing {
+            let red = NSColor(red: 1.0, green: 0.27, blue: 0.23, alpha: 1)   // #FF453A
+            let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
+                .applying(NSImage.SymbolConfiguration(paletteColors: [red]))
+            let image = base.withSymbolConfiguration(config) ?? base
+            image.isTemplate = false          // keep the colour
+            return image
+        } else {
+            let image = base.withSymbolConfiguration(.init(pointSize: 14, weight: .regular)) ?? base
+            image.isTemplate = true           // normal black/white menu bar icon
+            return image
+        }
     }
 }
 

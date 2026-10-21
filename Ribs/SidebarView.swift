@@ -5,6 +5,8 @@ enum SidebarItem: Hashable {
     case songs
     case albums
     case playlist(UUID)
+    case tapes
+    case archive
 }
 
 struct SidebarView: View {
@@ -13,6 +15,10 @@ struct SidebarView: View {
 
     @Environment(\.modelContext) private var context
     @Query(sort: \Playlist.createdAt) private var playlists: [Playlist]
+
+    @AppStorage("playlistsExpanded") private var playlistsExpanded = true
+    @AppStorage("foldersExpanded") private var foldersExpanded = false
+    @State private var lock = TapesLock.shared
 
     @State private var renamingID: UUID?
     @State private var draftName = ""
@@ -28,25 +34,37 @@ struct SidebarView: View {
             item("Songs", .songs)
             item("Albums", .albums)
 
-            sectionLabel("Playlists").padding(.top, 10)
-            ScrollView {
-                VStack(spacing: 4) {
-                    ForEach(playlists) { playlistRow($0) }
+            // Folders: tucked between Library and Playlists
+            collapsibleHeader("Folders", expanded: $foldersExpanded)
+                .padding(.top, 10)
+            if foldersExpanded {
+                folderRow(.tapes, collection: TrackCollection.tapes, locked: !lock.isAccessible)
+                folderRow(.archive, collection: TrackCollection.archive, locked: false)
+            }
 
-                    Button(action: newPlaylist) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "plus").font(.system(size: 12))
-                            Text("New Playlist")
+            collapsibleHeader("Playlists", expanded: $playlistsExpanded)
+                .padding(.top, 10)
+            ScrollView {
+                if playlistsExpanded {
+                    VStack(spacing: 4) {
+                        ForEach(playlists) { playlistRow($0) }
+
+                        Button(action: newPlaylist) {
+                            HStack(spacing: 10) {
+                                Image(systemName: "plus").font(.system(size: 12))
+                                Text("New Playlist")
+                            }
+                            .foregroundStyle(Theme.tertiary)
+                            .padding(.horizontal, 12)
+                            .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
+                            .contentShape(Rectangle())
                         }
-                        .foregroundStyle(Theme.tertiary)
-                        .padding(.horizontal, 12)
-                        .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
-                        .contentShape(Rectangle())
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
             .scrollIndicators(.never)
+
         }
         .font(.system(size: 14))
         .padding(.top, 40)
@@ -61,6 +79,12 @@ struct SidebarView: View {
                 .opacity(0)
                 .allowsHitTesting(false)
         }
+        .task {
+            // Don't start with the cursor in the search box
+            try? await Task.sleep(for: .milliseconds(100))
+            searchFocused = false
+            NSApp.keyWindow?.makeFirstResponder(nil)
+        }
     }
 
     // MARK: Search
@@ -74,6 +98,7 @@ struct SidebarView: View {
                 .textFieldStyle(.plain)
                 .font(.system(size: 13))
                 .focused($searchFocused)
+                .focusEffectDisabled()                // no blue system ring
                 .onExitCommand {                      // Esc clears
                     search = ""
                     searchFocused = false
@@ -101,7 +126,7 @@ struct SidebarView: View {
         }
     }
 
-    // MARK: Rows
+    // MARK: Headers & rows
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text)
@@ -110,6 +135,27 @@ struct SidebarView: View {
             .padding(.horizontal, 10)
             .padding(.top, 8)
             .padding(.bottom, 2)
+    }
+
+    private func collapsibleHeader(_ title: String, expanded: Binding<Bool>) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.15)) { expanded.wrappedValue.toggle() }
+        } label: {
+            HStack(spacing: 5) {
+                Text(title)
+                    .font(.system(size: 11, weight: .semibold))
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 8, weight: .bold))
+                    .rotationEffect(.degrees(expanded.wrappedValue ? 90 : 0))
+                Spacer()
+            }
+            .foregroundStyle(Theme.tertiary)
+            .padding(.horizontal, 10)
+            .padding(.top, 8)
+            .padding(.bottom, 2)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private func item(_ label: String, _ value: SidebarItem) -> some View {
@@ -123,6 +169,32 @@ struct SidebarView: View {
                 .highlight(isOn ? .selected : nil, radius: 10)
         }
         .buttonStyle(.plain)
+    }
+
+    private func folderRow(_ kind: FolderKind, collection: String, locked: Bool) -> some View {
+        let value: SidebarItem = kind == .tapes ? .tapes : .archive
+        let isOn = selection == value
+        return Button { selection = value } label: {
+            HStack {
+                Text(kind.title)
+                Spacer()
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(isOn ? Theme.selectedText : Theme.tertiary)
+                }
+            }
+            .foregroundStyle(isOn ? Theme.selectedText : Theme.text)
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
+            .contentShape(Rectangle())
+            .highlight(isOn ? .selected : nil, radius: 10)
+        }
+        .buttonStyle(.plain)
+        // Drop songs onto a folder to move them there
+        .dropDestination(for: String.self) { items, _ in
+            _ = move(items, to: collection)
+        }
     }
 
     @ViewBuilder
@@ -143,15 +215,13 @@ struct SidebarView: View {
         } else {
             let isOn = selection == .playlist(playlist.id)
             Button { selection = .playlist(playlist.id) } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "music.note.list").font(.system(size: 12))
-                    Text(playlist.name).lineLimit(1)
-                }
-                .foregroundStyle(isOn ? Theme.selectedText : Theme.text)
-                .padding(.horizontal, 12)
-                .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
-                .contentShape(Rectangle())
-                .highlight(isOn ? .selected : nil, radius: 10)
+                Text(playlist.name)
+                    .lineLimit(1)
+                    .foregroundStyle(isOn ? Theme.selectedText : Theme.text)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .highlight(isOn ? .selected : nil, radius: 10)
             }
             .buttonStyle(.plain)
             .contextMenu {
@@ -169,6 +239,7 @@ struct SidebarView: View {
     // MARK: Actions
 
     private func newPlaylist() {
+        playlistsExpanded = true
         let playlist = Playlist(name: "Untitled Playlist")
         context.insert(playlist)
         try? context.save()
@@ -200,6 +271,17 @@ struct SidebarView: View {
         guard !ids.isEmpty else { return false }
         for id in ids where !playlist.trackIDs.contains(id) {
             playlist.trackIDs.append(id)
+        }
+        try? context.save()
+        return true
+    }
+
+    private func move(_ items: [String], to collection: String?) -> Bool {
+        let ids = Set(items.compactMap(UUID.init(uuidString:)))
+        guard !ids.isEmpty else { return false }
+        let all = (try? context.fetch(FetchDescriptor<Track>())) ?? []
+        for track in all where ids.contains(track.id) {
+            track.collection = collection
         }
         try? context.save()
         return true

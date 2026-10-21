@@ -27,7 +27,8 @@ final class Importer {
     init(context: ModelContext) { self.context = context }
 
     /// Imports files and folders. Plain drag = move; forceCopy (Option-drag) = copy.
-    func importItems(_ urls: [URL], forceCopy: Bool) async -> ImportSummary {
+    /// `collection`: nil = Music, or TrackCollection.tapes / .archive.
+    func importItems(_ urls: [URL], forceCopy: Bool, collection: String? = nil) async -> ImportSummary {
         var summary = ImportSummary()
         try? LibraryFolder.ensureExists()
 
@@ -36,7 +37,7 @@ final class Importer {
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
 
             for file in files(in: url) {
-                switch await importFile(file, forceCopy: forceCopy) {
+                switch await importFile(file, forceCopy: forceCopy, collection: collection) {
                 case .moved: summary.moved += 1
                 case .copied: summary.copied += 1
                 case .keptOriginal: summary.keptOriginal += 1
@@ -62,7 +63,7 @@ final class Importer {
         }
     }
 
-    private func importFile(_ source: URL, forceCopy: Bool) async -> Outcome {
+    private func importFile(_ source: URL, forceCopy: Bool, collection: String?) async -> Outcome {
         // 1. Can macOS play it?
         let asset = AVURLAsset(url: source)
         guard (try? await asset.load(.isPlayable)) == true else { return .unsupported }
@@ -111,6 +112,7 @@ final class Importer {
                           fileSize: size,
                           duration: info.duration,
                           format: source.pathExtension.uppercased())
+        track.collection = collection
         track.tagTitle = info.title
         track.tagArtist = info.artist
         track.tagAlbum = info.album

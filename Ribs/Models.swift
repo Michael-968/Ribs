@@ -1,6 +1,12 @@
 import Foundation
 import SwiftData
 
+/// Where a track lives: nil = Music, otherwise one of the fixed folders.
+enum TrackCollection {
+    static let tapes = "tapes"
+    static let archive = "archive"
+}
+
 @Model
 final class Track {
     @Attribute(.unique) var id: UUID
@@ -10,6 +16,9 @@ final class Track {
     var dateAdded: Date
     var duration: Double        // seconds
     var format: String          // MP3, M4A, FLAC…
+
+    // nil = Music; "tapes" or "archive" = that folder
+    var collection: String?
 
     // Read from the file's tags (nil = missing)
     var tagTitle: String?
