@@ -83,8 +83,10 @@ struct ContentView: View {
                 $0.title.localizedStandardCompare($1.title) == .orderedAscending
             })
             handleOpenedFiles()
+            handleAutoImport()
         }
         .onChange(of: openQueue.pending) { handleOpenedFiles() }
+        .onChange(of: openQueue.autoImport) { handleAutoImport() }
         .onChange(of: selection) { openAlbum = nil }
         .fileImporter(isPresented: $showImporter,
                       allowedContentTypes: [.audio, .folder],
@@ -153,6 +155,20 @@ struct ContentView: View {
                 }
                 player.play(track, from: sorted)
             }
+        }
+    }
+
+    /// New files from Downloads: import quietly, one notification per batch.
+    private func handleAutoImport() {
+        let urls = openQueue.autoImport
+        guard !urls.isEmpty else { return }
+        openQueue.autoImport = []
+
+        Task {
+            let summary = await Importer(context: context).importItems(urls, forceCopy: false)
+            showStatus(summary.message)
+            let added = summary.moved + summary.copied + summary.keptOriginal
+            if added > 0 { DownloadsWatcher.notify(added: added) }
         }
     }
 
