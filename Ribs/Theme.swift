@@ -187,6 +187,7 @@ struct ArtworkView: View {
         Group {
             if let image {
                 Image(nsImage: image).resizable().scaledToFill()
+                    .allowsHitTesting(false)
             } else {
                 Color.black
             }

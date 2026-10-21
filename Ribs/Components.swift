@@ -75,6 +75,7 @@ struct CoverImage: View {
             .overlay {
                 if let data, let image = NSImage(data: data) {
                     Image(nsImage: image).resizable().scaledToFill()
+                        .allowsHitTesting(false)
                 }
             }
             .clipShape(.rect(cornerRadius: radius))

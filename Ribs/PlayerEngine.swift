@@ -192,13 +192,22 @@ final class PlayerEngine {
               let track = list.first(where: { $0.id == id })
         else { return }
 
+        let position = defaults.double(forKey: Key.position)   // read BEFORE load() overwrites it
+
         sourceList = list
         buildQueue(startingWith: track)
         load(queue[index], autoplay: false)
 
-        let position = defaults.double(forKey: Key.position)
         if position > 1 && position < duration - 1 {
-            seek(to: position)
+            Task { @MainActor in
+                // wait until the file is ready, then jump to the saved spot
+                var tries = 0
+                while player.currentItem?.status != .readyToPlay && tries < 50 {
+                    try? await Task.sleep(for: .milliseconds(100))
+                    tries += 1
+                }
+                seek(to: position)
+            }
         }
     }
 
